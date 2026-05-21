@@ -1,6 +1,9 @@
 #%% Rayden Dodd Term Project DashBoard
 import pandas as pd
 import numpy as np
+import os
+import subprocess
+import sys
 from matplotlib.ticker import FuncFormatter
 from scipy import stats            # QQ-plot
 import plotly.express as px
@@ -24,8 +27,26 @@ periods = ['AM Peak (Open-9:30am)',
            'Late Night (12am-Close)']
 
 #%% Upload dataset
-dataset = 'Entries_by_Year_Full_Data_data/Entries_by_Year_Full_Data_data.csv'
-mlb_schedule_dataset = 'Entries_by_Year_Full_Data_data/mlb-2024-orig.csv'
+data_dir = 'Entries_by_Year_Full_Data_data'
+full_dataset = os.path.join(data_dir, 'Entries_by_Year_Full_Data_data.csv')
+sample_dataset = os.path.join(data_dir, 'small_sample.csv')
+sample_script = os.path.join(data_dir, 'sample.py')
+mlb_schedule_dataset = os.path.join(data_dir, 'mlb-2024-orig.csv')
+
+data_mode = os.environ.get('WMATA_DATA_MODE', 'sample').lower()
+if '--full-data' in sys.argv:
+    data_mode = 'full'
+    sys.argv.remove('--full-data')
+elif '--sample-data' in sys.argv:
+    data_mode = 'sample'
+    sys.argv.remove('--sample-data')
+
+if data_mode == 'full':
+    dataset = full_dataset
+else:
+    if not os.path.exists(sample_dataset):
+        subprocess.run([sys.executable, os.path.basename(sample_script)], cwd=data_dir, check=True)
+    dataset = sample_dataset
 
 df = pd.read_csv(dataset)
 mlb_schedule = pd.read_csv(mlb_schedule_dataset)
@@ -1114,7 +1135,21 @@ def update_stats(feature, cleaning_data, trans_map):
 # -------------------------------------------------------------------
 # MAIN
 # -------------------------------------------------------------------
+# -------------------------------------------------------------------
+# MAIN
+# -------------------------------------------------------------------
 if __name__ == '__main__':
+    url = "http://127.0.0.1:8035/"
+
+    print("\n" + "=" * 60)
+    print("WMATA Metro Ridership Dashboard")
+    print("=" * 60)
+    print("Dash is starting...")
+    print(f"Open this link in your browser: {url}")
+    print("Press Ctrl+C in the terminal to stop the server.")
+    print("=" * 60 + "\n")
+
     app.run(
+        debug=True,
         port=8035
     )
