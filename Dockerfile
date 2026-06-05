@@ -1,14 +1,15 @@
-FROM python:3.8-slim-buster
+FROM python:3.11-slim-bookworm
 
-ENV APP_HOME /app
-ENV PYTHONUNBUFFERED True
+ENV APP_HOME=/app
+ENV PYTHONUNBUFFERED=True
+ENV PORT=8050
+ENV WMATA_DATA_MODE=sample
+
 WORKDIR $APP_HOME
 
-ADD requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir gunicorn
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN groupadd -r app && useradd -r -g app app
-COPY --chown=app:app . ./
-USER app
+COPY . .
 
-CMD exec gunicorn --bind :$PORT --log-level info --workers 1 --threads 8 --timeout 0 app:server
+CMD gunicorn --bind 0.0.0.0:${PORT} --log-level info --workers 1 --threads 4 --timeout 0 Dashboard:server
