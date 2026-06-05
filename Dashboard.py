@@ -176,7 +176,6 @@ home_layout = html.Div([
     prevent_initial_call=True
 )
 def download_csv(n_clicks):
-    df = pd.read_csv("assets/mlb-2024-orig.csv")
     return dcc.send_data_frame(df.to_csv, "wmata_ridership.csv", index=False)
 
 # Data Cleaning & Outlier Detetction
